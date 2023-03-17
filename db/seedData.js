@@ -3,14 +3,65 @@
 const client = require("./client")
 
 async function dropTables() {
-  console.log("Dropping All Tables...")
+  console.log("Dropping All Tables - db/seedData.js")
+  try{
+    await client.query(`
+    drop table if exists routine_activities;
+    drop table if exists routines;
+    drop table if exists activities;
+    drop table if exists users;   
+    `)
+    console.log("Successfully dropped all tables - db/seedData.js")
   // drop all tables, in the correct order
+  }catch(err){
+    console.log(err, "There was an error dropping tables - db/seedData.js")
+    throw err
+  } 
 }
 
 async function createTables() {
-  console.log("Starting to build tables...")
-  // create all tables, in the correct order
+  // TODO: Hash password for users table
+  // TODO: Lowercase all entries being added into activities
+  console.log("Starting to build tables - db/seedData.js")
+  try{
+    await client.query(`
+    create table users (
+      id serial primary key,
+      username varchar(255) unique not null,
+      password varchar(255) not null
+    );
+
+    create table activities (
+      id serial primary key,
+      name varchar(255) unique not null,
+      description text not null
+    );
+
+    create table routines (
+      id serial primary key,
+      "creatorId" integer references users(id),
+      "isPublic" boolean default false,
+      name varchar(255) unique not null,
+      goal text not null
+    );
+
+    create table routine_activities (
+      id serial primary key,
+      "routineId" integer references routines(id),
+      "activityId" integer references activities(id),
+      unique ("routineId", "activityId"),
+      duration integer,
+      count integer
+    );
+    `)
+
+    console.log("Successfully created tables! - db/seedData.js")
+  }catch(err){
+    console.log(err, "There was an error creating tables - db/seedData.js")
+    throw err
+  }
 }
+  // create all tables, in the correct order
 
 /* 
 
