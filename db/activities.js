@@ -4,17 +4,19 @@ const client = require('./client');
 async function createActivity({ name, description }) {
   // return the new activity
   try{
-    console.log('Creating the new activity')
-    const { row:[activity]} = await client.query(`
+    console.log('Creating the new activity in db/activities.js')
+    console.log("Name: ", name);
+    console.log("description: ", description);
+    const { rows:[activity]} = await client.query(`
       INSERT INTO activities (name, description)
       VALUES($1, $2)
       ON CONFLICT (name) DO NOTHING
       RETURNING *;
     `,[name, description]);
-    console.log('Completed creating the new activity')
+    console.log('Completed creating the new activity in db/activities.js')
     return activity
   }catch(error){
-    console.log('There was an error creating your new activity')
+    console.log('There was an error creating your new activity. Error: ', error)
     throw error;
   }
 }
