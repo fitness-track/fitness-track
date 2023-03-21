@@ -44,7 +44,29 @@ async function getRoutineActivityById(id) {
 
 // async function getRoutineActivitiesByRoutine({ id }) {}
 
-// async function updateRoutineActivity({ id, ...fields }) {}
+async function updateRoutineActivity({ id, ...fields }) {
+  console.log('Updating routine activity')
+    const setRoutineActivity = Object.keys(fields).map(
+      (key,index) => `"${key}"=$${index + 1}`
+    ).join(',');
+
+    if (setRoutineActivity.length === 0){
+      return;
+    }
+
+    try{
+      const {rows:[routineActivity]} = await client.query(`
+      UPDATE routine_activities
+      SET ${setRoutineActivity}
+      WHERE id=${id}
+      RETURNING *;
+      `,Object.values(fields));
+      console.log('Finished updating routine activity')
+      return routineActivity
+    }catch(error){
+      console.log('There was an error updating the routine activity')
+    }
+}
 
 // async function destroyRoutineActivity(id) {}
 
