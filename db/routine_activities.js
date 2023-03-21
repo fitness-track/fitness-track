@@ -42,7 +42,21 @@ async function getRoutineActivityById(id) {
   }
 }
 
-// async function getRoutineActivitiesByRoutine({ id }) {}
+// Still working on this. Have to join tables and return only where routine ID matches
+async function getRoutineActivitiesByRoutine({ id }) {
+  try{
+    console.log('Getting routine acitivites by routine')
+    const {row:[]} = await client.query(`
+    
+    
+    `)
+  
+  
+  }catch(error){
+    console.log('There was an error getting routine activities by routine', error)
+    throw error
+  }
+}
 
 async function updateRoutineActivity({ id, ...fields }) {
   console.log('Updating routine activity')
