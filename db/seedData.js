@@ -3,8 +3,6 @@
 const client = require("./client")
 const {createRoutine,
       getRoutinesWithoutActivities} = require("./routines")
-const {addActivityToRoutine} = require("./routine_activities")
-
 
 async function dropTables() {
   console.log("Dropping All Tables - db/seedData.js")
