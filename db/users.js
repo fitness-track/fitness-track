@@ -49,7 +49,7 @@ async function getUserById(userId) {
   console.log("starting getUserById")
   try{
   const {rows: [user] }= await client.query(`
-  SELECT ${user} FROM users WEHRE id=${userId};`)
+  SELECT ${user} FROM users WHERE id=${userId};`)
     return user;
 
   }catch{
