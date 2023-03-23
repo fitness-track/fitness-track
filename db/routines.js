@@ -21,16 +21,16 @@ async function createRoutine({ creatorId, isPublic, name, goal }) {
 // async function getRoutineById(id) {}
 
 async function getRoutinesWithoutActivities() {
-  console.log("Running getRoutinesWithoutActivities function in db\routines.js")
+  console.log("Running getRoutinesWithoutActivities function in db routines.js")
   try {
     const { rows } = await client.query(`
       SELECT * FROM routines;
     `);
 
-    console.log("Exiting getRoutinesWithoutActivities function in db\routines.js")
+    console.log("Exiting getRoutinesWithoutActivities function in db routines.js")
     return rows;
   } catch(err) {
-    console.error("Error in getRoutinesWithoutActivities in db\routines.js", err);
+    console.error("Error in getRoutinesWithoutActivities in db routines.js", err);
     throw err;
   }
 }
@@ -47,7 +47,22 @@ async function getRoutinesWithoutActivities() {
 
 // async function updateRoutine({ id, ...fields }) {}
 
-// async function destroyRoutine(id) {}
+async function destroyRoutine(id) {
+  try{
+    console.log("Running destroyRoutine function in db routines.js")
+    const { rows } = await client.query(`
+      DELETE * 
+      FROM routines 
+      JOIN routine_activities ON "routine_activities.routineId" = routine.id
+      WHERE name = $1;
+      `,[id])   
+    console.log("Completed destroyRoutine function in db routines.js")
+    return rows
+  }catch (err){
+    console.error("Error running destroyRoutine function in db routines.js", err);
+    throw err
+  }
+}
 
 module.exports = {
   // getRoutineById,
@@ -59,5 +74,5 @@ module.exports = {
   // getPublicRoutinesByActivity,
   createRoutine,
   // updateRoutine,
-  // destroyRoutine,
+  destroyRoutine
 };
