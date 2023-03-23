@@ -54,7 +54,7 @@ async function destroyRoutine(id) {
       DELETE * 
       FROM routines 
       JOIN routine_activities ON "routine_activities.routineId" = routine.id
-      WHERE name = $1;
+      WHERE "routineId"=$1;
       `,[id])   
     console.log("Completed destroyRoutine function in db routines.js")
     return rows
