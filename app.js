@@ -14,6 +14,9 @@ app.use(morgan('dev'))
 const cors = require('cors')
 app.use(cors())
 
+app.use(express.json())
+app.use("/api", require("./api"));
+
 const client = require("./db/client")
 client.connect()
 
