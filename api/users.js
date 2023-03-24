@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 const express = require("express");
-const { getUserByUsername, createUser, getUser, } = require("../db");
+const { getUserByUsername, createUser, getUser, getAllRoutinesByUser, } = require("../db");
 const router = express.Router();
 
 const { 
@@ -83,24 +83,24 @@ usersRouter.post('/login', async(req, res, next) => {
     try {
     const user = await getUserByUsername(username);
 
-    if (user && user.password == password) {
-        const token = jwt.sign({ 
-        id: user.id, 
-        username
-        }, process.env.JWT_SECRET, {
-        expiresIn: '1w'
-        });
+        if (user && user.password == password) {
+            const token = jwt.sign({ 
+            id: user.id, 
+            username
+            }, process.env.JWT_SECRET, {
+            expiresIn: '1w'
+            });
 
-        res.send({ 
-        message: "you're logged in!",
-        token 
-        });
-    } else {
-        next({ 
-        name: 'IncorrectCredentialsError', 
-        message: 'Username or password is incorrect'
-        });
-    }
+            res.send({ 
+            message: "you're logged in!",
+            token 
+            });
+        } else {
+            next({ 
+            name: 'IncorrectCredentialsError', 
+            message: 'Username or password is incorrect'
+            });
+        }
     } catch(error) {
     console.log("error loggin user in api/users.js", error);
     throw(error);
@@ -108,7 +108,7 @@ usersRouter.post('/login', async(req, res, next) => {
 });
 
 // GET /api/users/me
-usersRouter.get('/', async(req, res, next) => {
+usersRouter.get('/me', async(req, res, next) => {
     try{
         const user = await getUser({username, password});
 
@@ -122,5 +122,24 @@ usersRouter.get('/', async(req, res, next) => {
 })
 
 // GET /api/users/:username/routines
+usersRouter.get("/:username/routine", async (req, res, next) => {
+
+    if(username && username.password == password ) {
+        try{
+            const myData = await getAllRoutinesByUser({username});
+
+            res.send({
+                myData
+            })
+        }catch(error){
+            console.log("error getting routines within username at api/users.js", error);
+            throw error;
+        }
+
+    }else{
+        next()
+    }
+})
+
 
 module.exports = router;
