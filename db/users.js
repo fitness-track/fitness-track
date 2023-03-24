@@ -56,11 +56,16 @@ async function createUser({ username, password }) {
 //   SELECT ${user} FROM users WHERE id=${userId};`)
 //     return user;
 
+// <<<<<<< feat/#22-API-Users
+async function getUserByUsername(username) {
+  console.log("Starting to getUserByUsername")
+// =======
 //   }catch(error){
 //     console.log("error getting user by id");
 //     throw error;
 //   }
 // }
+// >>>>>>> main
 
 // async function getUserByUsername(userName) {
 //   console.log("Starting to getUserByUsername")

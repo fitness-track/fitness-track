@@ -22,21 +22,96 @@ async function addActivityToRoutine({
   }
 }
 
-// async function getRoutineActivityById(id) {}
+async function getRoutineActivityById(id) {
+  try{
+    console.log('Getting routine activity by id')
+    const {rows: [routineActivity]} = await client.query(`
+      SELECT id, "routineId", "activityId", duration, count,
+      FROM routine_activities
+      WHERE id=${id}
+    `);
 
-// async function getRoutineActivitiesByRoutine({ id }) {}
+    if (!routineActivity){
+      return null
+    }
+    console.log('Finished getting routine activity by id')
+    return routineActivity
+  }catch(error){
+    console.log('Error getting routine activities by id', error)
+    throw error
+  }
+}
 
-// async function updateRoutineActivity({ id, ...fields }) {}
+async function getRoutineActivitiesByRoutine({ id }) {
+  try{
+    console.log('Getting routine activity by routine')
+    const { rows: activitesByRoutine } = await client.query(`
+      SELECT routines.id
+      FROM routines
+      JOIN routine_activities ON routines.id=routine_activities.id
+      WHERE routine_activities."routineId"=$1;
+      RETURNING *;
+    `, [id]);
 
-// async function destroyRoutineActivity(id) {}
+    if (!routineActivity){
+      return null
+    }
+    console.log('Finished getting routine activity by routine')
+    return routineActivity
+  }catch(error){
+    console.log('Error getting routine activities by routine', error)
+    throw error
+  }
+}
 
-// async function canEditRoutineActivity(routineActivityId, userId) {}
+async function updateRoutineActivity({ id, ...fields }) {
+  console.log('Updating routine activity')
+    const setRoutineActivity = Object.keys(fields).map(
+      (key,index) => `"${key}"=$${index + 1}`
+    ).join(',');
+
+    if (setRoutineActivity.length === 0){
+      return;
+    }
+
+    try{
+      const {rows:[routineActivity]} = await client.query(`
+      UPDATE routine_activities
+      SET ${setRoutineActivity}
+      WHERE id=${id}
+      RETURNING *;
+      `,Object.values(fields));
+      console.log('Finished updating routine activity')
+      return routineActivity
+    }catch(error){
+      console.log('There was an error updating the routine activity')
+    }
+}
+
+async function destroyRoutineActivity(id) {
+  try{
+    console.log('Destroying routine activity')
+    const {rows:[routineActivities]} = await client.query(`
+      DELETE FROM routine_activities
+      WHERE id=${id}
+      RETURNING *;
+    `);
+    console.log('Finished obliterating the routine activity')
+    return routineActivities
+  }catch(error){
+    console.log('There was an error deleting the routine activity', error)
+    throw error
+  }
+
+}
+
+// async function canEditRoutineActivity(routineActivityId, userId) {} (Not in the project guide (yet)-CL
 
 module.exports = {
-  // getRoutineActivityById,
+  getRoutineActivityById,
   addActivityToRoutine,
-  // getRoutineActivitiesByRoutine,
-  // updateRoutineActivity,
-  // destroyRoutineActivity,
+  getRoutineActivitiesByRoutine,
+  updateRoutineActivity,
+  destroyRoutineActivity,
   // canEditRoutineActivity,
 };
