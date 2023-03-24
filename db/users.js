@@ -58,7 +58,7 @@ async function getUserById(userId) {
   }
 }
 
-async function getUserByUsername(userName) {
+async function getUserByUsername(username) {
   console.log("Starting to getUserByUsername")
 
   try{
