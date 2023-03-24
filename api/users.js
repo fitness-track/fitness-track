@@ -1,46 +1,38 @@
 /* eslint-disable no-useless-catch */
 const express = require("express");
-const { getUserByUsername, createUser, getUser, getAllRoutinesByUser, } = require("../db");
-const router = express.Router();
-
-const { 
-  createUser,
-  getAllUsers,
-  getUserByUsername,
-} = require('../db');
+const { getUserByUsername, createUser, getUser, getAllRoutinesByUser } = require("../db");
+const usersRouter = express.Router();
 
 const jwt = require('jsonwebtoken');
-
+const jwt_secret = "verysecretive"
 
 
 // POST /api/users/register
 usersRouter.post('/register', async (req, res, next) =>{
     const { username, password } = req.body;
-
-
     console.log("starting to register new user - users.js/api")
 
-
     try {
-        const_user = await getUserByUsername(username);
+        let user = await getUserByUsername(username);
 
-        if(_user) {
+        if(user) {
             next({
                 name: 'UserExistsError',
                 message: "A user by that username already exists and our database isn't that good silly goose"
             });
+        } else {
+
+            user = await createUser({
+                username, password
+            });
+
+            const token = jwt.sign({id: user.id, username}, jwt_secret, { expiresIn: '1w' });
+
+            res.send({ message: 'thank you for signing up', token});
         }
-
-        const user = await createUser({
-            username, password
-        });
-
-        const token = jwt.sign({id: user.id, username
-        }, process.env.JWT_SECRET, { expiresIn: '1w' });
-
-        res.send({ message: 'thank you for signing up', token});
     }catch(err){
-        console.log("error registering user")
+        console.log("error registering user.  Error: ", err)
+        next();
     }
 });
 
@@ -71,7 +63,6 @@ usersRouter.post('/register', async (req, res, next) =>{
 // POST /api/users/login
 usersRouter.post('/login', async(req, res, next) => {
     const { username, password } = req.body;
-
     console.log("Starting to login user in api/users.js")
     if (!username || !password) {
     next({
@@ -87,7 +78,7 @@ usersRouter.post('/login', async(req, res, next) => {
             const token = jwt.sign({ 
             id: user.id, 
             username
-            }, process.env.JWT_SECRET, {
+            }, jwt_secret, {
             expiresIn: '1w'
             });
 
@@ -102,13 +93,14 @@ usersRouter.post('/login', async(req, res, next) => {
             });
         }
     } catch(error) {
-    console.log("error loggin user in api/users.js", error);
+    console.log("error logging user in api/users.js", error);
     throw(error);
     }
 });
 
 // GET /api/users/me
 usersRouter.get('/me', async(req, res, next) => {
+    const { username, password } = req.body;
     try{
         const user = await getUser({username, password});
 
@@ -117,13 +109,14 @@ usersRouter.get('/me', async(req, res, next) => {
         });
     }catch(err){
         console.log("error getting user at api/users.js", err)
-        throw (err);
+        next();
     }
 })
 
 // GET /api/users/:username/routines
 usersRouter.get("/:username/routine", async (req, res, next) => {
-
+    const { password } = req.body;
+    const { username } = req.params;
     if(username && username.password == password ) {
         try{
             const myData = await getAllRoutinesByUser({username});
@@ -142,4 +135,4 @@ usersRouter.get("/:username/routine", async (req, res, next) => {
 })
 
 
-module.exports = router;
+module.exports = usersRouter;
