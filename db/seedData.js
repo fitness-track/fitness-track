@@ -2,7 +2,12 @@
 // const { } = require('./');
 const client = require("./client")
 const {createRoutine,
-      getRoutinesWithoutActivities} = require("./routines")
+      getRoutinesWithoutActivities,
+      createUser,
+      createActivity,
+      getAllActivities,
+      addActivityToRoutine} = require("./index");
+
 
 async function dropTables() {
   console.log("Dropping All Tables - db/seedData.js")
@@ -41,7 +46,7 @@ async function createTables() {
 
     create table routines (
       id serial primary key,
-      "creatorId" integer references users(id),
+      "creatorId" integer references users(Id),
       "isPublic" boolean default false,
       name varchar(255) unique not null,
       goal text not null
@@ -72,7 +77,7 @@ DO NOT CHANGE ANYTHING BELOW. This is default seed data, and will help you start
 */
 
 async function createInitialUsers() {
-  console.log("Starting to create users...")
+  console.log("Starting to create users... createInitialUsers in seedData.js")
   try {
     const usersToCreate = [
       { username: "albert", password: "bertie99" },
@@ -81,11 +86,11 @@ async function createInitialUsers() {
     ]
     const users = await Promise.all(usersToCreate.map(createUser))
 
-    console.log("Users created:")
+    console.log("Users created: ... createInitialUsers in seedData.js")
     console.log(users)
-    console.log("Finished creating users!")
+    console.log("Finished creating users! ... createInitialUsers in seedData.js")
   } catch (error) {
-    console.error("Error creating users!")
+    console.error("Error creating users! ... createInitialUsers in seedData.js")
     throw error
   }
 }
