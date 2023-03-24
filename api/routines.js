@@ -5,40 +5,44 @@ const jwt_secret = "verysecretive"
 
 const {getRoutineById, getRoutinesWithoutActivities, getAllRoutines, getAllRoutinesByUser,
        getPublicRoutinesByUser, getPublicRoutinesByActivity, createRoutine, updateRoutine, 
-       destroyRoutine} = require("../db")
+       destroyRoutine, updateRoutineActivity} = require("../db")
 
 // GET /api/routines
-routineRouter.get("/routines", async(req, res)=>{
+routineRouter.get("/", async(req, res)=>{
   console.log("GET request for /routines received in api-routines.js")
-  console.log("reg.body: ", req.body)
+  console.log("req.body: ", req.body)
   const request = await getAllRoutines();
   res.send(request);
 })
 
 // POST /api/routines
-routineRouter.post("/routines", async(req, res, next)=>{
+routineRouter.post("/", async(req, res, next)=>{
   console.log("GET request for /routines received in api-routines.js")
-  console.log("reg.body: ", req.body)
+  console.log("req.body: ", req.body)
   try{
-    const token = req.header('Authorization')
-    const parsedToken = jwt.verify(token, jwt_secret)
-    const result = await createRoutine(req.body)
+    const {creatorId, isPublic, name, goal} = req.body
+    const routineData = {}
+    routineData.creatorId=creatorId;
+    routineData.isPublic=isPublic;
+    routineData.name=name;
+    routineData.goal=goal;
+    const result = await createRoutine(routineData)
     console.log("result = ", result)
     res.send(result);
   }catch(error){
     console.error("There was an error in POST /routines api-routines.js", error)
+    next();
   }
   
 })
 
-
 // PATCH /api/routines/:routineId
-routineRouter.patch("/routines/:routineId", async(req, res, next)=>{
+routineRouter.patch("/:routineId", async(req, res, next)=>{
   console.log("PATCH request for /routines /:routineId received in api-routines.js")
-  console.log("reg.body: ", req.body)
+  console.log("req.body: ", req.body)
 
   const { routineId } = req.params;
-  const { isPublic, name, goals } = req.body;
+  const { user, isPublic, name, goals } = req.body;
 
   const updateFields = {};
 
@@ -55,9 +59,8 @@ routineRouter.patch("/routines/:routineId", async(req, res, next)=>{
   }
 
   try {
-    const originalRoutine = await getRoutineById(routineId);
 
-    if (originalRoutine.creatorId === req.users.id){
+    if (routineId && routineId.creatorId === user.id){
       const updatedRoutine = await updateRoutine(routineId, updateFields);
       res.send({ routine: updatedRoutine })
     } else {
@@ -72,20 +75,20 @@ routineRouter.patch("/routines/:routineId", async(req, res, next)=>{
 });
 
 // DELETE /api/routines/:routineId
-routineRouter.delete('/routines/:routineId', async (req, res, next) => {
-  console.log("Trying the routineRouter.delete function in api-routines.js")
+routineRouter.delete('/:routineId', async (req, res, next) => {
+  console.log("Trying the routineActivity delete function in api-routines.js")
   try {
     const { routineId } = req.params;
-    if (routineId.creatorId === user.id){
+    const { user } = req.body
+    
+    if (routineId && routineId.creatorId === user.id){
       const routine = await destroyRoutine(routineId);
       res.send({ routine });
-      } else {
-        next(routine ? {
-          name: "UnauthorizedUserError",
-          message: "You cannot delete a routine that doesn't belong to you"
-        } : {
-          name: "RoutineNotFoundError",
-          message: "That routine does not exist"
+
+    } else {
+        next({
+          name: "ThereWasAnError",
+          message: "ErrorAtDeleteRoutineActivities"
         });
       }
   } catch ({ name, message }) {
@@ -93,6 +96,25 @@ routineRouter.delete('/routines/:routineId', async (req, res, next) => {
   }
 });
 
+
 // POST /api/routines/:routineId/activities
+routineRouter.patch('/:routineId/activities', async (req, res, next) => {
+  console.log("Attempting to add an activity to an existing routine")
+  try{
+    const { routineAcitvityId } = req.params;
+    const { duration, count } = req.body;
+
+    const updateFields = {}
+    updateFields.activityId = routineAcitvityId
+    updateFields.duration = duration
+    updateFields.count = count
+    const result = await updateRoutineActivity(updateFields)
+  
+    res.send({ routine: result }) 
+  } catch ( {name, message }) {
+    next( { name, message });
+  }
+})
+
 
 module.exports = routineRouter;
