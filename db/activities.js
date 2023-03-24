@@ -23,7 +23,7 @@ async function createActivity({ name, description }) {
 
 async function getAllActivities() {
   // select and return an array of all activities
-  console.log('Getting all activites')
+  console.log('Getting all activities')
   try{
     const {rows} = await client.query(`
       SELECT id, name, description
