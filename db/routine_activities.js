@@ -45,7 +45,7 @@ async function getRoutineActivityById(id) {
 async function getRoutineActivitiesByRoutine({ id }) {
   try{
     console.log('Getting routine activity by routine')
-    const { rows: activitesByRoutine } = await client.query(`
+    const { rows: activitiesByRoutine } = await client.query(`
       SELECT routines.id
       FROM routines
       JOIN routine_activities ON routines.id=routine_activities.id
@@ -53,11 +53,11 @@ async function getRoutineActivitiesByRoutine({ id }) {
       RETURNING *;
     `, [id]);
 
-    if (!routineActivity){
+    if (!activitiesByRoutine){
       return null
     }
     console.log('Finished getting routine activity by routine')
-    return routineActivity
+    return activitiesByRoutine
   }catch(error){
     console.log('Error getting routine activities by routine', error)
     throw error
