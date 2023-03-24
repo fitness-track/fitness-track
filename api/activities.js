@@ -1,11 +1,11 @@
 const express = require('express');
-const router = express.Router();
+const activitiesRouter = express.Router();
 
 const {
     getAllActivities,
-    getActivityById,
-    getActivityByName,
-    attachActivitiesToRoutines,
+    // getActivityById,
+    // getActivityByName,
+    // attachActivitiesToRoutines,
     createActivity,
     updateActivity,
     getRoutineActivityById,
@@ -14,7 +14,7 @@ const {
 
 // GET /api/activities/:activityId/routines
 
-activitiesRouter.get('/', async (req,res,next) =>{
+activitiesRouter.get('/:activityId/routines', async (req,res,next) =>{
     const {activityId} = req.params;
     try{
         const activities = await getRoutineActivityById(activityId);
@@ -24,9 +24,7 @@ activitiesRouter.get('/', async (req,res,next) =>{
     }catch({activities}){
         console.log('There was an error using the GET activities router')
         next({activities})
-    }
-    
-
+    }  
 })
 // GET /api/activities
 
@@ -45,7 +43,7 @@ activitiesRouter.get('/', async (req,res,next) =>{
 // POST /api/activities
 
 activitiesRouter.post('/', async (req,res,next) =>{
-    const {name, description = ""} = req.body
+    const {name, description} = req.body
     const activityData = {}
     try{
         activityData.name=name;
@@ -63,8 +61,9 @@ activitiesRouter.post('/', async (req,res,next) =>{
     });
 // PATCH /api/activities/:activityId
 
-activitiesRouter.patch('/', async (req,res,next) =>{
-    const { id, name, description } = req.body
+activitiesRouter.patch('/:activityId', async (req,res,next) =>{
+    const { id } = req.params;
+    const { name, description } = req.body
     const updateFields = {}
     try{
         updateFields.id = id;
@@ -81,4 +80,4 @@ activitiesRouter.patch('/', async (req,res,next) =>{
     }
     });
 
-module.exports = router;
+module.exports = activitiesRouter;
