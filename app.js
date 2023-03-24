@@ -2,6 +2,11 @@ require("dotenv").config()
 const express = require("express")
 const app = express()
 
+const fourOhFour = {
+  name: '404Error',
+  message: 'This path does not exist'
+}
+
 // Setup your Middleware and API Router here
 const morgan = require("morgan")
 app.use(morgan('dev'))
@@ -12,15 +17,15 @@ app.use(cors())
 const client = require("./db/client")
 client.connect()
 
-app.use(express.json())
-app.use("/", require("./api"));
+const apiRouter = require('./api');
+app.use('/api', apiRouter);
 
 app.get("/",(req,res)=>{
-  res.send("hello")
+  res.send("hello1")
 })
 
-app.get("*",(req,res)=>{
-  res.status(404).send("error")
+app.get("/api/unknown",(req,res)=>{
+  res.status(404).send(fourOhFour)
 })
 
 module.exports = app;
