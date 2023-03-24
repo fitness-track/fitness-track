@@ -13,7 +13,7 @@ async function createActivity({ name, description }) {
       ON CONFLICT (name) DO NOTHING
       RETURNING *;
     `,[name, description]);
-    console.log('Completed creating the new activity in db/activities.js')
+    console.log('Completed creating the new activity in db/activities.js', activity)
     return activity
   }catch(error){
     console.log('There was an error creating your new activity. Error: ', error)

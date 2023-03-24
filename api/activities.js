@@ -49,9 +49,7 @@ activitiesRouter.post('/', async (req, res, next) =>{
         activityData.description=description;
 
         const activities = await createActivity(activityData);
-        res.send({
-           message:'Activity created!', activities
-        })
+        res.send(activities)
     }catch({activities}){
         console.log('There was en error in the POST activities router')
         next({activities})
