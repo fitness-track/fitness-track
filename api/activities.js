@@ -31,19 +31,18 @@ activitiesRouter.get('/:activityId/routines', async (req,res,next) =>{
 activitiesRouter.get('/', async (req,res,next) =>{
     try{
         const activities = await getAllActivities();
-        res.send({
-            activities
-        })
-    }catch({activities}){
+        res.send(activities)
+    }catch(activities){
         console.log('There was an error using the GET activities router')
-        next({activities})
+        next(activities)
     }
     });
 
 // POST /api/activities
 
-activitiesRouter.post('/', async (req,res,next) =>{
-    const {name, description} = req.body
+activitiesRouter.post('/', async (req, res, next) =>{
+    console.log("some dumb reqbody: ", req.body);
+    const { name, description } = req.body
     const activityData = {}
     try{
         activityData.name=name;
@@ -75,7 +74,7 @@ activitiesRouter.patch('/:activityId', async (req,res,next) =>{
             activities
         })
     }catch({activities}){
-        console.log('There was a error in the PATCH acitivies router')
+        console.log('There was a error in the PATCH activities router')
         next({activities})
     }
     });
