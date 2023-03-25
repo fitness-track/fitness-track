@@ -53,12 +53,16 @@ async function getAllRoutines() {
   // select and return an array of all activities
   console.log('Running getAllRoutines function in db routines.js')
   try{
-    const{rows} = await client.query(`
-      SELECT * 
-      FROM routines;
+    //Team this was changed due to the test requirement parameters. Needed and alias and users table join
+    // ALIAS syntax SELECT column_name AS alias_name
+    const{rows: routines} = await client.query(`
+      SELECT routines.*, users.username AS "creatorName"
+      FROM routines
+      INNER JOIN users
+      ON routines."creatorId"=users.id;
     `)
     console.log('Finished running getAllRoutines function in db routines.js')
-    return rows;
+    return routines;
   }catch(error){
     console.log(`Error in getAllRoutines function in db routines.js: ${error}`)
     throw error
@@ -86,10 +90,10 @@ async function getAllRoutinesByUser({ username }) {
   console.log('Running getAllRoutinesByUser function in db routines.js')
   try{
     const{ rows: routines} = await client.query(`
-      SELECT * 
+      SELECT routines.*, users.username AS "creatorName"
       FROM routines
       JOIN users
-      ON routines.id = users.id
+      ON routines."creatorId" = users.id
       WHERE users.username = $1;
     `, [username])
     console.log('Finished running getAllRoutinesByUser function in db routines.js')
@@ -105,11 +109,11 @@ async function getPublicRoutinesByUser({ username }) {
   console.log('Running getPublicRoutinesByUser function in db routines.js')
   try{
     const{ rows: routines} = await client.query(`
-      SELECT * 
+      SELECT routines.*, users.username as "creatorName"
       FROM routines
       JOIN users
-      ON "routines.creatorId" = users.id
-      WHERE users.username = $1 AND "routines.isPublic" = "true";
+      ON routines."creatorId" = users.id
+      WHERE users.username = $1 AND routines."isPublic" = true;
     `, [username])
     console.log('Finished running getPublicRoutinesByUser function in db routines.js')
     return routines;
@@ -123,9 +127,11 @@ async function getPublicRoutinesByActivity({ id }) {
   console.log('Running getPublicRoutinesByActivity function in db routines.js')
   try{
     const{ rows: routines} = await client.query(`
-      SELECT * 
+      SELECT routines.*, users.username AS "creatorName" 
       FROM routines
-      WHERE Id = $1 and "routines.isPublic" = "true";
+      JOIN users
+      ON routines."creatorId" = users.id
+      WHERE Id = $1 and routines."isPublic" = true;
     `, [id])
     console.log('Finished running getPublicRoutinesByActivity function in db routines.js')
     return routines;
@@ -165,18 +171,26 @@ async function updateRoutine({ id, ...fields }) {
 // }
 //=======
 async function destroyRoutine(id) {
+  //David changed this following w3 SQL DELETE syntax DELETE FROM table_name WHERE condition;
   try{
     console.log("Running destroyRoutine function in db routines.js")
-    const { rows } = await client.query(`
-      DELETE * 
+    const { rows:[routine] } = await client.query(`
+      DELETE 
       FROM routines 
-      JOIN routine_activities ON "routine_activities.routineId" = routine.id
-      WHERE "routineId"=$1;
-      `,[id])   
+      WHERE id= $1
+      RETURNING *;
+      `,[id]);
+
+      await client.query(`
+        DELETE 
+        FROM routine_activities
+        WHERE "routineId"=$1
+        RETURNING *; 
+      `,[id]);
     console.log("Completed destroyRoutine function in db routines.js")
-    return rows
+    return routine
   }catch (err){
-    console.error("Error running destroyRoutine function in db routines.js", err);
+    console.log("Error running destroyRoutine function in db routines.js", err);
     throw err
   }
 }
