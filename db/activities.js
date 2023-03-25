@@ -26,7 +26,7 @@ async function getAllActivities() {
   console.log('Getting all activities')
   try{
     const {rows} = await client.query(`
-      SELECT id, name, description
+      SELECT *
       FROM activities
     `)
     console.log('Finished getting all activities')
@@ -37,14 +37,14 @@ async function getAllActivities() {
   }
 }
 
-async function getActivityById(id) {
+async function getActivityById(activityId) {
   console.log('Getting activity by id')
   try{
     const{rows:[activity]} = await client.query(`
-      SELECT id, name, description
+      SELECT *
       FROM activities
-      WHERE id=${id};
-    `,[id])
+      WHERE id=${activityId};
+    `,)
     console.log('Finished getting activity by id')
     return activity;
   }catch(error){
@@ -52,12 +52,12 @@ async function getActivityById(id) {
     throw error
   }
 }
-
+//not listed in the course page
 async function getActivityByName(name) {
   console.log('Getting activity by name')
   try{
     const{rows:[activity]}= await client.query(`
-      SELECT id, name, description
+      SELECT *
       FROM activities
       WHERE name=${name};
     `,[name])
