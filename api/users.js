@@ -1,10 +1,12 @@
 /* eslint-disable no-useless-catch */
 const express = require("express");
+const bcrypt = require("bcrypt")
 const { getUserByUsername, createUser, getUser, getAllRoutinesByUser } = require("../db");
+const { UserTakenError, PasswordTooShortError, UnauthorizedError } = require("../errors");
 const usersRouter = express.Router();
 
 const jwt = require('jsonwebtoken');
-const jwt_secret = "verysecretive"
+const jwt_secret = "neverTell"
 
 
 // POST /api/users/register
@@ -16,11 +18,31 @@ usersRouter.post('/register', async (req, res, next) =>{
         let user = await getUserByUsername(username);
 
         if(user) {
-            next({
-                name: 'UserExistsError',
-                message: "A user by that username already exists and our database isn't that good silly goose"
-            });
-        } else {
+            console.log("Error, this user exists", user)
+            const errorMessage = UserTakenError(username)
+            const duplicateUserError = {
+                message: errorMessage,
+                name: username,
+                error: "UserExistsError"
+            }
+            res.send(duplicateUserError);
+            // res.send(UserTakenError(username));
+            // next({
+            //     name: 'UserExistsError',
+            //     message: "A user by that username already exists and our database isn't that good silly goose"
+            // });
+        }
+        
+        if(password.length<8) {
+            console.log("Password too short", password)
+            const errorMessage = PasswordTooShortError()
+            const tooShortError = {
+                error: "PasswordTooShortError",
+                message: errorMessage,
+                name: username,
+            }
+            res.send(tooShortError);
+        }
 
             user = await createUser({
                 username, password
@@ -28,11 +50,9 @@ usersRouter.post('/register', async (req, res, next) =>{
 
             const token = jwt.sign({id: user.id, username}, jwt_secret, { expiresIn: '1w' });
 
-            res.send({ message: 'thank you for signing up', token});
-        }
-    }catch(err){
-        console.log("error registering user.  Error: ", err)
-        next();
+            res.send({ message: 'thank you for signing up', token, user});
+        } catch( {name, message }){
+            next({ name, message });
     }
 });
 
@@ -64,30 +84,33 @@ usersRouter.post('/register', async (req, res, next) =>{
 usersRouter.post('/login', async(req, res, next) => {
     const { username, password } = req.body;
     console.log("Starting to login user in api/users.js")
+    console.log("/api/users/login username and password:", username, password)
+    
     if (!username || !password) {
-    next({
+    res.send({
         name: "MissingCredentialsError",
         message: "Please supply both a username and password"
     });
     }
 
     try {
-    const user = await getUserByUsername(username);
-
-        if (user && user.password == password) {
+        const _user = await getUserByUsername(username);
+        console.log("Username response from getUserByUsername: ", _user)
+        let hashedPass = _user.password
+        let match = await bcrypt.compare(password, hashedPass)
+        
+        if (match) {
             const token = jwt.sign({ 
-            id: user.id, 
+            id: _user.id, 
             username
             }, jwt_secret, {
             expiresIn: '1w'
             });
+            const user = {id: _user.id, username: _user.username}
+            res.send({message: "you're logged in!", user, token});
 
-            res.send({ 
-            message: "you're logged in!",
-            token 
-            });
         } else {
-            next({ 
+            res.send({ 
             name: 'IncorrectCredentialsError', 
             message: 'Username or password is incorrect'
             });
@@ -104,9 +127,7 @@ usersRouter.get('/me', async(req, res, next) => {
     try{
         const user = await getUser({username, password});
 
-        res.send({
-            user
-        });
+        res.send(user);
     }catch(err){
         console.log("error getting user at api/users.js", err)
         next();
