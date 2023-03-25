@@ -16,6 +16,7 @@ async function createUser({ username, password }) {
     VALUES($1, $2)
     RETURNING *; 
     `, [username, hashedPassword])
+    delete user.password
     return user;
   }catch(error){
     console.log("error creating user us CreateUser db/users.js");
@@ -40,6 +41,7 @@ async function getUser({ username, password }) {
   // }
  
     if(passwordsMatch){
+      delete user.password
       return user;
     }
 }
@@ -49,7 +51,8 @@ async function getUserById(userId) {
   console.log("starting getUserById")
   try{
   const {rows: [user] }= await client.query(`
-  SELECT ${user} FROM users WHERE id=${userId};`)
+  SELECT * FROM users WHERE id=${userId};`)
+  delete user.password
     return user;
 
 // <<<<<<< feat/#22-API-Users
@@ -68,7 +71,10 @@ async function getUserByUsername(username) {
 
   try{
     const {rows:[user]} = await client.query(`
-    SELECT ${user} FROM users WHERE username =${username};`)
+    SELECT * 
+    FROM users 
+    WHERE username =$1;
+    `,[username])
     return user;
 
   }catch(error){

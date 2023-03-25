@@ -54,7 +54,8 @@ async function getAllRoutines() {
   console.log('Running getAllRoutines function in db routines.js')
   try{
     const{rows} = await client.query(`
-      SELECT * FROM routines;
+      SELECT * 
+      FROM routines;
     `)
     console.log('Finished running getAllRoutines function in db routines.js')
     return rows;
@@ -69,8 +70,9 @@ async function getAllPublicRoutines() {
   console.log('Running getAllPublicRoutines function in db routines.js')
   try{
     const{rows} = await client.query(`
-      SELECT * FROM routines
-      WHERE "isPublic" = "true";
+      SELECT * 
+      FROM routines
+      WHERE "isPublic" = true;
     `)
     console.log('Finished running getAllPublicRoutines function in db routines.js')
     return rows;
