@@ -14,12 +14,14 @@ async function createUser({ username, password }) {
     INSERT INTO users(username, 
     password)
     VALUES($1, $2)
+    ON CONFLICT (username) DO NOTHING
     RETURNING *; 
     `, [username, hashedPassword])
+ 
     delete user.password
     return user;
-  }catch(error){
-    console.log("error creating user us CreateUser db/users.js");
+ 
+  } catch(error) {
     throw error;
   }
 }
