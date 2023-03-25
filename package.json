@@ -29,10 +29,10 @@
   },
   "homepage": "https://github.com/wallacepreston/fitnesstrackr#readme",
   "devDependencies": {
-    "eslint": "^8.36.0",
-    "eslint-plugin-jest": "^25.7.0",
+    "eslint": "^8.2.0",
+    "-plugin-jest": "^25.2.4",
     "nodemon": "^2.0.22",
-    "supertest": "^6.3.3"
+    "supertest": "^6.1.6"
   },
   "dependencies": {
     "axios": "^0.19.2",

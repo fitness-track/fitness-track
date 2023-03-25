@@ -13,7 +13,7 @@ async function createActivity({ name, description }) {
       ON CONFLICT (name) DO NOTHING
       RETURNING *;
     `,[name, description]);
-    console.log('Completed creating the new activity in db/activities.js')
+    console.log('Completed creating the new activity in db/activities.js', activity)
     return activity
   }catch(error){
     console.log('There was an error creating your new activity. Error: ', error)
@@ -23,10 +23,10 @@ async function createActivity({ name, description }) {
 
 async function getAllActivities() {
   // select and return an array of all activities
-  console.log('Getting all activites')
+  console.log('Getting all activities')
   try{
-    const{rows}= await client.query(`
-      SELECT id, name, description
+    const {rows} = await client.query(`
+      SELECT *
       FROM activities
     `)
     console.log('Finished getting all activities')
@@ -37,14 +37,14 @@ async function getAllActivities() {
   }
 }
 
-async function getActivityById(id) {
+async function getActivityById(activityId) {
   console.log('Getting activity by id')
   try{
     const{rows:[activity]} = await client.query(`
-      SELECT id, name, description
+      SELECT *
       FROM activities
-      WHERE id=${id};
-    `,[id])
+      WHERE id=${activityId};
+    `,)
     console.log('Finished getting activity by id')
     return activity;
   }catch(error){
@@ -52,12 +52,12 @@ async function getActivityById(id) {
     throw error
   }
 }
-
+//not listed in the course page
 async function getActivityByName(name) {
   console.log('Getting activity by name')
   try{
     const{rows:[activity]}= await client.query(`
-      SELECT id, name, description
+      SELECT *
       FROM activities
       WHERE name=${name};
     `,[name])

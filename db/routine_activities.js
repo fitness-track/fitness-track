@@ -26,14 +26,14 @@ async function getRoutineActivityById(id) {
   try{
     console.log('Getting routine activity by id')
     const {rows: [routineActivity]} = await client.query(`
-      SELECT id, "routineId", "activityId", duration, count,
+      SELECT *
       FROM routine_activities
       WHERE id=${id}
     `);
 
-    if (!routineActivity){
-      return null
-    }
+    // if (!routineActivity){
+    //   return null
+    // }
     console.log('Finished getting routine activity by id')
     return routineActivity
   }catch(error){
@@ -45,13 +45,21 @@ async function getRoutineActivityById(id) {
 async function getRoutineActivitiesByRoutine({ id }) {
   try{
     console.log('Getting routine activity by routine')
-    const { rows: activitiesByRoutine } = await client.query(`
-      SELECT routines.id
-      FROM routines
-      JOIN routine_activities ON routines.id=routine_activities.id
-      WHERE routine_activities."routineId"=$1;
-      RETURNING *;
-    `, [id]);
+    const {rows: routines } = await client.query(`
+      SELECT *
+      FROM routine_activities
+      WHERE "routineId" = ${id};
+    `);
+
+      return routines;
+    // joining tables was not necessary
+    // const { rows: activitiesByRoutine } = await client.query(`
+    //   SELECT routines.id
+    //   FROM routines
+    //   JOIN routine_activities ON routines.id=routine_activities.id
+    //   WHERE routine_activities."routineId"=$1;
+    //   RETURNING *;
+    // `, [id]);
 
     if (!activitiesByRoutine){
       return null

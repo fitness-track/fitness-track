@@ -1,34 +1,34 @@
 require("dotenv").config()
 const express = require("express")
 const app = express()
+
+const fourOhFour = {
+  name: '404Error',
+  message: 'This path does not exist'
+}
+
+// Setup your Middleware and API Router here
+const morgan = require("morgan")
+app.use(morgan('dev'))
+
 const cors = require('cors')
 app.use(cors())
 
-// Setup your Middleware and API Router here
-// require('dotenv').config();
-// const { PORT = 3000 } = process.env;
-// const express = require('express');
-const server = express();
-const bodyParser = require('body-parser');
-server.use(bodyParser.json());
+app.use(express.json())
+app.use("/api", require("./api"));
 
-const morgan = require('morgan');
-server.use(morgan('dev'));
+const client = require("./db/client")
+client.connect()
 
-server.use((req, res, next) => {
-  console.log("<____Body Logger START____>");
-  console.log(req.body);
-  console.log("<_____Body Logger END_____>");
-  next();
-});
+const apiRouter = require('./api');
+app.use('/api', apiRouter);
 
-// const apiRouter = require('./api');
-// server.use('/api', apiRouter);
-// const { client } = require('./db');
-// client.connect();
-// server.listen(PORT, () => {
-//   console.log("The server is up on port", PORT);
-// });
+app.get("/",(req,res)=>{
+  res.send("hello1")
+})
 
+app.get("/api/unknown",(req,res)=>{
+  res.status(404).send(fourOhFour)
+})
 
 module.exports = app;
