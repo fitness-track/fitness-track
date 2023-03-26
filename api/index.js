@@ -7,6 +7,7 @@ const twoCents = {
   date: new Date()
   }
 
+  
 // GET /api/health
 router.get('/health', async (req, res, next) => {
   res.status(200).send(twoCents)
