@@ -141,7 +141,18 @@ async function getPublicRoutinesByUser({ username }) {
       JOIN users
       ON routines."creatorId" = users.id
       WHERE users.username = $1 AND routines."isPublic" = true;
-// past back here
+      `, [username]);
+
+      const {rows: mergedActivities }= await client.query(`
+        SELECT *
+        FROM routine_activities
+        LEFT JOIN activities
+        ON routine_activities."activityId" = activities.id;
+      `)
+      const combinedRoutine = attachActivitiesToRoutines(routines, mergedActivities)
+      console.log('Finished running getAllPublicRoutinesByUser function in db routines.js')
+      return combinedRoutine;
+      
   }catch(error){
     console.log(`Error in getAllRoutinesByUser function in db routines.js: ${error}`)
     throw error
