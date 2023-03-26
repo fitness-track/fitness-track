@@ -135,23 +135,13 @@ async function getAllRoutinesByUser({ username }) {
 async function getPublicRoutinesByUser({ username }) {
   console.log('Running getPublicRoutinesByUser function in db routines.js')
   try{
-    const{ rows: routines} = await client.query(`
+    const{ rows: routines } = await client.query(`
       SELECT routines.*, users.username as "creatorName"
       FROM routines
       JOIN users
       ON routines."creatorId" = users.id
       WHERE users.username = $1 AND routines."isPublic" = true;
-    `, [username]);
-
-    const {rows: mergedActivities }= await client.query(`
-      SELECT *
-      FROM routine_activities
-      LEFT JOIN activities
-      ON routine_activities."activityId" = activities.id;
-    `)
-    const combinedRoutine = attachActivitiesToRoutines(routines, mergedActivities)
-    console.log('Finished running getAllPublicRoutinesByUser function in db routines.js')
-    return combinedRoutine;
+// past back here
   }catch(error){
     console.log(`Error in getAllRoutinesByUser function in db routines.js: ${error}`)
     throw error

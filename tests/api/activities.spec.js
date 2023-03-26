@@ -60,7 +60,7 @@ describe("/api/activities", () => {
       expect(response.body).toMatchObject(activityData);
     });
 
-    xit("responds with an error when a activity already exists with the same name", async () => {
+    it("responds with an error when a activity already exists with the same name", async () => {
       const { token } = await createFakeUserWithToken("alice");
 
       await createFakeActivity("Push Ups", "Do 30 reps");
@@ -108,7 +108,7 @@ describe("/api/activities", () => {
       });
     });
 
-    xit("returns an error when updating an activity that does not exist", async () => {
+    it("returns an error when updating an activity that does not exist", async () => {
       const { token } = await createFakeUserWithToken("Barry");
 
       const newActivityData = {
@@ -124,7 +124,7 @@ describe("/api/activities", () => {
       expectToHaveErrorMessage(response.body, ActivityNotFoundError(10000));
     });
 
-    xit("returns an error when changing an activity to have the name of an existing activity", async () => {
+    it("returns an error when changing an activity to have the name of an existing activity", async () => {
       const { token } = await createFakeUserWithToken("Jane");
       const fakeActivity = await createFakeActivity(
         "Beat Saber",
@@ -178,7 +178,7 @@ describe("/api/activities", () => {
       expect(response.body).toEqual(routinesFromDB);
     });
 
-    xit("Should return an error when you ask for an activity that does not exist", async () => {
+    it("Should return an error when you ask for an activity that does not exist", async () => {
       const response = await request(app).get("/api/activities/10000/routines");
 
       expectToHaveErrorMessage(response.body, ActivityNotFoundError(10000));
