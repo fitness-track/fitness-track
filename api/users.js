@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 const express = require("express");
 const bcrypt = require("bcrypt")
-const { getUserByUsername, createUser, getUser, getAllRoutinesByUser } = require("../db");
+const { getUserByUsername, createUser, getUser, getAllRoutinesByUser, getPublicRoutinesByUser } = require("../db");
 const { UserTakenError, PasswordTooShortError, UnauthorizedError } = require("../errors");
 const usersRouter = express.Router();
 
@@ -100,12 +100,7 @@ usersRouter.post('/login', async(req, res, next) => {
         let match = await bcrypt.compare(password, hashedPass)
         
         if (match) {
-            const token = jwt.sign({ 
-            id: _user.id, 
-            username
-            }, jwt_secret, {
-            expiresIn: '1w'
-            });
+            const token = jwt.sign({id: _user.id, username}, jwt_secret, { expiresIn: '1w' });
             const user = {id: _user.id, username: _user.username}
             res.send({message: "you're logged in!", user, token});
 
@@ -123,36 +118,107 @@ usersRouter.post('/login', async(req, res, next) => {
 
 // GET /api/users/me
 usersRouter.get('/me', async(req, res, next) => {
-    const { username, password } = req.body;
-    try{
-        const user = await getUser({username, password});
+    // const { username, password } = req.body;
+    // try{
+    //     const user = await getUser({username, password});
 
-        res.send(user);
-    }catch(err){
-        console.log("error getting user at api/users.js", err)
-        next();
+    //     res.send(user);
+    // }catch(err){
+    //     console.log("error getting user at api/users.js", err)
+    //     next();
+    // }
+    
+    const prefix = "Bearer "
+    const auth = req.header("Authorization")
+    if (!auth){
+        res.status(401).send({
+            "error": "No authorization string provided in header",
+            "message": "You must be logged in to perform this action",
+            "name": "AuthorizationHeaderError"
+        })
+    } else if (auth.startsWith(prefix)) {
+        const token = auth.slice(prefix.length);
+    
+        try{
+            console.log("Token received: ", token);
+            const parsedToken = jwt.verify(token, jwt_secret, {expiresIn:'1w'})
+            console.log("ParsedToken: ", parsedToken);
+            res.send(parsedToken)
+        } catch (error) {
+            res.status(401).send({
+                "error": "Authorization token malformed",
+                "message": "You must be logged in to perform this action",
+                "name": "AuthorizationHeaderError"
+            })
+        }
+    } else {
+        res.status(401).send({
+            "error": "Authorization token must start with \"Bearer \"",
+            "message": "You must be logged in to perform this action",
+            "name": "AuthorizationHeaderError"
+        })
     }
 })
 
 // GET /api/users/:username/routines
 usersRouter.get("/:username/routine", async (req, res, next) => {
-    const { password } = req.body;
-    const { username } = req.params;
-    if(username && username.password == password ) {
+    // check if the param user is the same as the authenticated user
+    // if so, then get public routines and the user's private routines
+    // if not, then get only public routines for that user
+    const username = req.params;
+    const { id } = getUserByUsername(username)
+    const prefix = "Bearer "
+    const auth = req.header("Authorization")
+    if (!auth){
+        // get public routines only
+        const response = await getPublicRoutinesByUser(username)
+        console.log("No auth, so returning getPublicRoutinesByUser: ",response)
+        res.send(response)
+    } else if (auth.startsWith(prefix)) {
+        // check if the user is authenticated
+        const token = auth.slice(prefix.length);
+    
         try{
-            const myData = await getAllRoutinesByUser({username});
-
-            res.send({
-                myData
+            const parsedToken = jwt.verify(token, jwt_secret, {expiresIn:'1w'})
+            if (parsedToken.id == id){
+                const response = await getAllRoutinesByUser(username)
+                res.send(response)
+            } else {
+                const response = await getPublicRoutinesByUser(username)
+                res.send(response)
+            }
+        } catch (error) {
+            res.status(401).send({
+                "error": "Authorization token malformed",
+                "message": "You must be logged in to perform this action",
+                "name": "AuthorizationHeaderError"
             })
-        }catch(error){
-            console.log("error getting routines within username at api/users.js", error);
-            throw error;
         }
-
-    }else{
-        next()
+    } else {
+        res.status(401).send({
+            "error": "Authorization token must start with \"Bearer \"",
+            "message": "You must be logged in to perform this action",
+            "name": "AuthorizationHeaderError"
+        })
     }
+
+    // const { password } = req.body;
+    // const { username } = req.params;
+    // if(username && username.password == password ) {
+    //     try{
+    //         const myData = await getPublicRoutinesByUser({username});
+
+    //         res.send({
+    //             myData
+    //         })
+    //     }catch(error){
+    //         console.log("error getting routines within username at api/users.js", error);
+    //         throw error;
+    //     }
+
+    // }else{
+    //     next()
+    // }
 })
 
 

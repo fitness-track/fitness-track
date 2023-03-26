@@ -108,7 +108,7 @@ async function getAllRoutinesByUser({ username }) {
 async function getPublicRoutinesByUser({ username }) {
   console.log('Running getPublicRoutinesByUser function in db routines.js')
   try{
-    const{ rows: routines} = await client.query(`
+    const{ rows: [routines] } = await client.query(`
       SELECT routines.*, users.username as "creatorName"
       FROM routines
       JOIN users
