@@ -9,9 +9,10 @@ const {
     createActivity,
     updateActivity,
     getRoutineActivityById,
-    getPublicRoutinesByActivity
+    getPublicRoutinesByActivity,
+    getActivityById
 } = require('../db');
-const { ActivityExistsError } = require('../errors');
+const { ActivityExistsError, ActivityNotFoundError } = require('../errors');
 
 
 
@@ -20,22 +21,21 @@ activitiesRouter.get("/:activityId/routines", async (req, res, next) => {
     const { activityId } = req.params;
     const {name} = req.body
     // const activities = req.body
-
-
+    console.log(activityId)
 
     try {
-        const activities = await getRoutineActivityById({ activityId });
-
-        if (activities == name) {
-            console.log("Error, this activity already exists", name)
-            const errorMessage = ActivityExistsError(name)
+        const activities = await getActivityById(activityId);
+        
+        if(!activities){
+            const errorMessage = ActivityNotFoundError(activityId)
             const duplicateActivityError = {
+                error: "ActivityAlreadyExists",
                 message: errorMessage,
-                name: "name",
-                error: "ActivityAlreadyExists"
+                name: "name"
             }
             res.send(duplicateActivityError)
-        } 
+        }
+
         
         if (activities){
             res.send(activities);
@@ -84,9 +84,8 @@ activitiesRouter.post('/', async (req, res, next) =>{
     try {
         let activityPost = await createActivity (activityData);
         
-        if(activityName == name){
-          console.log("Error, this activity already exists", name)
-              const errorMessage = ActivityExistsError(name)
+        if(!activityPost){
+              const errorMessage = await ActivityExistsError(name)
               const duplicateActivityError = {
                   message: errorMessage,
                   name: "name",
@@ -131,6 +130,16 @@ activitiesRouter.patch('/:activityId', async (req,res,next) =>{
         updateFields.description = description;
 
         const activities = await updateActivity(updateFields);
+        if(activities.name == name){
+            const errorMessage = ActivityNotFoundError(activityId)
+            const duplicateActivityError = {
+                error: "ActivityAlreadyExists",
+                message: errorMessage,
+                name: "name"
+            }
+            res.send(duplicateActivityError)
+        }
+        
         res.send({
             activities
         })
@@ -141,3 +150,6 @@ activitiesRouter.patch('/:activityId', async (req,res,next) =>{
     });
 
 module.exports = activitiesRouter;
+
+
+// activivtynotfound
