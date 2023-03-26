@@ -4,27 +4,43 @@ const activitiesRouter = express.Router();
 const {
     getAllActivities,
     // getActivityById,
-    // getActivityByName,
+    getActivityByName,
     // attachActivitiesToRoutines,
     createActivity,
     updateActivity,
     getRoutineActivityById,
     getPublicRoutinesByActivity
 } = require('../db');
+const { ActivityExistsError } = require('../errors');
 
 
 
 // GET /api/activities/:activityId/routines
-
 activitiesRouter.get("/:activityId/routines", async (req, res, next) => {
     const { activityId } = req.params;
-    try {
-        const activities = await getPublicRoutinesByActivity({ activityId });
+    const {name} = req.body
+    // const activities = req.body
 
-        if (activities) {
+
+
+    try {
+        const activities = await getRoutineActivityById({ activityId });
+
+        if (activities == name) {
+            console.log("Error, this activity already exists", name)
+            const errorMessage = ActivityExistsError(name)
+            const duplicateActivityError = {
+                message: errorMessage,
+                name: "name",
+                error: "ActivityAlreadyExists"
+            }
+            res.send(duplicateActivityError)
+        } 
+        
+        if (activities){
             res.send(activities);
-        } else {
-            next(error);
+        }else{
+            next()
         }
     }
     catch (error) {
@@ -43,8 +59,9 @@ activitiesRouter.get("/:activityId/routines", async (req, res, next) => {
 //         next({activities})
 //     }  
 // })
-// GET /api/activities
 
+
+// GET /api/activities
 activitiesRouter.get('/', async (req,res,next) =>{
     try{
         const activities = await getAllActivities();
@@ -53,23 +70,36 @@ activitiesRouter.get('/', async (req,res,next) =>{
         console.log('There was an error using the GET activities router')
         next(activities)
     }
-    });
+});
+
 
 // POST /api/activities
-
 activitiesRouter.post('/', async (req, res, next) =>{
     console.log("some dumb reqbody: ", req.body);
     const {name, description} =req.body;
     const activityData = {name, description}
+    const activityName = {name}
 
+    
     try {
-        const activityPost = await createActivity (activityData);
-
-        if (activityPost){
-            res.send(activityPost)
-        } else{
-            next(error)
+        let activityPost = await createActivity (activityData);
+        
+        if(activityName == name){
+          console.log("Error, this activity already exists", name)
+              const errorMessage = ActivityExistsError(name)
+              const duplicateActivityError = {
+                  message: errorMessage,
+                  name: "name",
+                  error: "ActivityAlreadyExists"
+              }
+              res.send(duplicateActivityError)
         }
+
+
+       if (activityPost){
+            res.send(activityPost)
+        }
+
     }catch(error){
         console.log('There was en error in the POST activities router')
         next(error)
@@ -94,6 +124,7 @@ activitiesRouter.patch('/:activityId', async (req,res,next) =>{
     const { id } = req.params;
     const { name, description } = req.body
     const updateFields = {}
+
     try{
         updateFields.id = id;
         updateFields.name = name;
