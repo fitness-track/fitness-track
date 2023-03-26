@@ -1,8 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const twoCents = {
+  health: "Healthy because it's a 2 instead of a 5",
+  uptime: process.uptime(),
+  message: "Doing excellent",
+  date: new Date()
+  }
 
+  
 // GET /api/health
 router.get('/health', async (req, res, next) => {
+  res.status(200).send(twoCents)
 });
 
 // ROUTER: /api/users
