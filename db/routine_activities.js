@@ -113,7 +113,11 @@ async function destroyRoutineActivity(id) {
 
 }
 
-// async function canEditRoutineActivity(routineActivityId, userId) {} (Not in the project guide (yet)-CL
+async function canEditRoutineActivity(routineActivityId, userId) {
+  
+
+
+}
 
 module.exports = {
   getRoutineActivityById,
