@@ -221,7 +221,7 @@ async function destroyRoutine(id) {
     console.log("Running destroyRoutine function in db routines.js")
     const { rows:[routine] } = await client.query(`
       DELETE 
-      FROM routines 
+      FROM routines  
       WHERE id= $1
       RETURNING *;
       `,[id]);
@@ -231,7 +231,7 @@ async function destroyRoutine(id) {
         FROM routine_activities
         WHERE "routineId"=$1
         RETURNING *; 
-      `,[id]);
+      `);
     console.log("Completed destroyRoutine function in db routines.js")
     return routine
   }catch (err){

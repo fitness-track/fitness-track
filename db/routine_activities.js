@@ -103,6 +103,7 @@ async function destroyRoutineActivity(id) {
       DELETE FROM routine_activities
       WHERE id=${id}
       RETURNING *;
+      
     `);
     console.log('Finished obliterating the routine activity')
     return routineActivities
@@ -114,8 +115,21 @@ async function destroyRoutineActivity(id) {
 }
 
 async function canEditRoutineActivity(routineActivityId, userId) {
+  const {rows} = await client.query(`
+  SELECT routines.*, users.*
+  FROM routines
+  JOIN users
+  ON routine_activity.id = users.id
+  WHERE users.username = $1;
   
+  `,[userId])
+  console.log(rows)
 
+  if(rows.length >0){
+    return true
+  }else{
+    return false
+  }
 
 }
 
