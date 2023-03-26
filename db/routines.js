@@ -58,11 +58,22 @@ async function getAllRoutines() {
     const{rows: routines} = await client.query(`
       SELECT routines.*, users.username AS "creatorName"
       FROM routines
-      INNER JOIN users
+      JOIN users
       ON routines."creatorId"=users.id;
+    `);
+
+    const {rows:mergedActivities}= await client.query(`
+      SELECT *
+      FROM routine_activities
+      FULL JOIN activities
+      ON routine_activities."activityId" = activities.id;
     `)
+    
     console.log('Finished running getAllRoutines function in db routines.js')
-    return routines;
+    console.log("You are loooking for this!!!!!!", routines)
+    // const combinedRoutine = await attachActivitiesForRoutineFunctions(routines);
+    // return combinedRoutine
+    return attachActivitiesToRoutines(routines, mergedActivities);
   }catch(error){
     console.log(`Error in getAllRoutines function in db routines.js: ${error}`)
     throw error
@@ -73,13 +84,22 @@ async function getAllPublicRoutines() {
   // select and return an array of all activities
   console.log('Running getAllPublicRoutines function in db routines.js')
   try{
-    const{rows} = await client.query(`
-      SELECT * 
+    const {rows:routines} = await client.query(`
+      SELECT routines.*, users.username AS "creatorName"  
       FROM routines
+      JOIN users
+      ON routines."creatorId" = users.id
       WHERE "isPublic" = true;
     `)
+    const {rows: mergedActivities }= await client.query(`
+      SELECT *
+      FROM routine_activities
+      LEFT JOIN activities
+      ON routine_activities."activityId" = activities.id;
+    `)
+    const combinedRoutine = attachActivitiesToRoutines(routines, mergedActivities)
     console.log('Finished running getAllPublicRoutines function in db routines.js')
-    return rows;
+    return combinedRoutine;
   }catch(error){
     console.log(`Error in getAllPublicRoutines function in db routines.js: ${error}`)
     throw error
@@ -96,8 +116,15 @@ async function getAllRoutinesByUser({ username }) {
       ON routines."creatorId" = users.id
       WHERE users.username = $1;
     `, [username])
+    const {rows: mergedActivities }= await client.query(`
+      SELECT *
+      FROM routine_activities
+      LEFT JOIN activities
+      ON routine_activities."activityId" = activities.id;
+    `)
+    const combinedRoutine = attachActivitiesToRoutines(routines, mergedActivities)
     console.log('Finished running getAllRoutinesByUser function in db routines.js')
-    return routines;
+    return combinedRoutine;
   }catch(error){
     console.log(`Error in getAllRoutinesByUser function in db routines.js: ${error}`)
     throw error
@@ -114,11 +141,19 @@ async function getPublicRoutinesByUser({ username }) {
       JOIN users
       ON routines."creatorId" = users.id
       WHERE users.username = $1 AND routines."isPublic" = true;
-    `, [username])
-    console.log('Finished running getPublicRoutinesByUser function in db routines.js')
-    return routines;
+    `, [username]);
+
+    const {rows: mergedActivities }= await client.query(`
+      SELECT *
+      FROM routine_activities
+      LEFT JOIN activities
+      ON routine_activities."activityId" = activities.id;
+    `)
+    const combinedRoutine = attachActivitiesToRoutines(routines, mergedActivities)
+    console.log('Finished running getAllPublicRoutinesByUser function in db routines.js')
+    return combinedRoutine;
   }catch(error){
-    console.log(`Error in getPublicRoutinesByUser function in db routines.js: ${error}`)
+    console.log(`Error in getAllRoutinesByUser function in db routines.js: ${error}`)
     throw error
   }
 }
@@ -131,13 +166,22 @@ async function getPublicRoutinesByActivity({ id }) {
       FROM routines
       JOIN users
       ON routines."creatorId" = users.id
-      WHERE Id = $1 and routines."isPublic" = true;
+      WHERE id = $1 and routines."isPublic" = true;
     `, [id])
+
+    const {rows: mergedActivities }= await client.query(`
+      SELECT *
+      FROM routine_activities
+      LEFT JOIN activities
+      ON routine_activities."activityId" = activities.id;
+    `)
+    let combinedRoutine = attachActivitiesToRoutines(routines, mergedActivities);
+    
     console.log('Finished running getPublicRoutinesByActivity function in db routines.js')
-    return routines;
+    return combinedRoutine;
   }catch(error){
-    console.log(`Error in getPublicRoutinesByActivity function in db routines.js: ${error}`)
-    throw error
+    console.log(`Error in getPublicRoutinesByActivity function in db routines.js`,error)
+    throw error;
   }
 }
 
@@ -194,6 +238,19 @@ async function destroyRoutine(id) {
     throw err
   }
 }
+
+function attachActivitiesToRoutines (routines, mergedActivities){
+  routines.forEach(routine => {
+    routine.activities = [];
+
+    mergedActivities.forEach(mergedActivity => {
+      if (routine.id === mergedActivity.routineId) {
+        routine.activities.push(mergedActivity);
+      }
+    });
+  });
+  return routines;
+};
 //>>>>>>> main
 
 module.exports = {

@@ -148,7 +148,7 @@ describe("DB Routines", () => {
       expectRoutinesToContainRoutine(routines, fakePrivateRoutine);
     });
 
-    xit("includes their activities", async () => {
+    it("includes their activities", async () => {
       const routines = await getAllRoutines();
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       expectRoutineToContainActivity(routine, fakeActivity);
@@ -166,7 +166,7 @@ describe("DB Routines", () => {
       expect(routine.creatorName).toEqual(fakeUser.username);
     });
 
-    xit("includes duration and count on activities, from routine_activities join", async () => {
+    it("includes duration and count on activities, from routine_activities join", async () => {
       const routines = await getAllRoutines();
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       const activity = routine.activities.find(
@@ -198,25 +198,25 @@ describe("DB Routines", () => {
       expectRoutinesNotToContainRoutine(routines, fakePrivateRoutine);
     });
 
-    xit("includes their activities", async () => {
+    it("includes their activities", async () => {
       const routines = await getAllPublicRoutines();
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       expectRoutineToContainActivity(routine, fakeActivity);
       expectRoutineToContainActivity(routine, fakeActivity2);
     });
 
-    it("should not include a routine more than once", async () => {
+    xit("should not include a routine more than once", async () => {
       const routines = await getAllPublicRoutines();
       expectRoutinesNotToContainDuplicates(routines, fakeRoutine);
     });
 
-    xit("includes username, from users join, aliased as creatorName", async () => {
+    it("includes username, from users join, aliased as creatorName", async () => {
       const routines = await getAllPublicRoutines();
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       expect(routine.creatorName).toEqual(fakeUser.username);
     });
 
-    xit("includes duration and count on activities, from routine_activities join", async () => {
+    it("includes duration and count on activities, from routine_activities join", async () => {
       const routines = await getAllPublicRoutines();
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       const activity = routine.activities.find(
@@ -254,7 +254,7 @@ describe("DB Routines", () => {
       expectRoutinesNotToContainRoutine(routines, anotherUsersRoutine);
     });
 
-    xit("includes their activities", async () => {
+    it("includes their activities", async () => {
       const routines = await getAllRoutinesByUser(fakeUser);
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       expectRoutineToContainActivity(routine, fakeActivity);
@@ -272,7 +272,7 @@ describe("DB Routines", () => {
       expect(routine.creatorName).toEqual(fakeUser.username);
     });
 
-    xit("includes duration and count on activities, from routine_activities join", async () => {
+    it("includes duration and count on activities, from routine_activities join", async () => {
       const routines = await getAllRoutinesByUser(fakeUser);
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       const activity = routine.activities.find(
@@ -304,7 +304,7 @@ describe("DB Routines", () => {
       expectRoutinesNotToContainRoutine(routines, fakePrivateRoutine);
     });
 
-    xit("includes their activities", async () => {
+    it("includes their activities", async () => {
       const routines = await getPublicRoutinesByUser(fakeUser);
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
 
@@ -312,7 +312,7 @@ describe("DB Routines", () => {
       expectRoutineToContainActivity(routine, fakeActivity2);
     });
 
-    xit("should not include a routine more than once", async () => {
+    it("should not include a routine more than once", async () => {
       const routines = await getPublicRoutinesByUser(fakeUser);
       expectRoutinesNotToContainDuplicates(routines, fakeRoutine);
     });
@@ -323,7 +323,7 @@ describe("DB Routines", () => {
       expect(routine.creatorName).toEqual(fakeUser.username);
     });
 
-    xit("includes duration and count on activities, from routine_activities join", async () => {
+    it("includes duration and count on activities, from routine_activities join", async () => {
       const routines = await getPublicRoutinesByUser(fakeUser);
       const routine = routines.find((routine) => routine.id === fakeRoutine.id);
       const activity = routine.activities.find(
@@ -408,7 +408,7 @@ describe("DB Routines", () => {
   });
 
   describe("updateRoutine", () => {
-    xit("Returns the updated routine", async () => {
+    it("Returns the updated routine", async () => {
       const fakeRoutine = await createFakePublicRoutine();
 
       const updatedRoutine = await updateRoutine({
@@ -421,7 +421,7 @@ describe("DB Routines", () => {
       expect(updatedRoutine.id).toEqual(fakeRoutine.id);
     });
 
-    xit("Updates the public status, name, or goal, as necessary", async () => {
+    it("Updates the public status, name, or goal, as necessary", async () => {
       const fakeRoutine = await createFakePublicRoutine();
 
       const name = faker.random.uuid();
@@ -439,7 +439,7 @@ describe("DB Routines", () => {
       expect(updatedRoutine.goal).toBe(goal);
     });
 
-    xit("Does not update fields that are not passed in", async () => {
+    it("Does not update fields that are not passed in", async () => {
       const fakeRoutine = await createFakePublicRoutine();
       const name = faker.random.uuid();
       const updatedRoutine = await updateRoutine({
