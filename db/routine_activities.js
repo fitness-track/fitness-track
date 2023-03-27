@@ -112,9 +112,23 @@ async function destroyRoutineActivity(id) {
   }
 
 }
+// Not enough time to figure this out-CL
+// async function canEditRoutineActivity(routineActivityId, userId) {
+//   const {rows} = await client.query(`
+//   SELECT routine_activities.*, users.*
+//   FROM routine_activities
+//   JOIN users
+//   ON routine_activity.id = users.id
+//   WHERE routine_activity.id = $1;
+  
+//   `,[routineActivityId,userId])
 
-// async function canEditRoutineActivity(routineActivityId, userId) {} (Not in the project guide (yet)-CL
-
+//   if(rows.routine_activities.id === rows.users.id){
+//     return true
+//   }else{
+//     return false
+//   }
+// }
 module.exports = {
   getRoutineActivityById,
   addActivityToRoutine,
